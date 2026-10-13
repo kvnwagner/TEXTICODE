@@ -646,6 +646,11 @@ function agregarFase() {
   numeroFaseNueva.value      = form.value.fases.length + 1
 }
 function quitarFase(idx) {
+  const f = form.value.fases[idx]
+  if (f && f.Estado_Fase === 'Completada') {
+    errorGuardar.value = 'No puedes quitar una fase que el operario ya completó.'
+    return
+  }
   form.value.fases.splice(idx, 1)
 }
 function nombreOperario(id) {
@@ -797,6 +802,9 @@ async function abrirModal(o) {
       const fases = await getFasesDeOrden(o.Id_Orden)
       fasesActuales = (Array.isArray(fases) ? fases : [])
         .map(f => ({
+          Id_Orden_Operario: f.Id_Orden_Operario,   
+          Id_Orden_Operario: f.Id_Orden_Operario,
+          Estado_Fase:       f.Estado_Fase,
           Id_Operario:      f.Id_Operario,
           Numero_Fase:      f.Numero_Fase,
           Descripcion_Fase: f.Descripcion_Fase || '',
@@ -928,16 +936,26 @@ async function guardar() {
       })
     }
 
-    // ── Fases: reemplazar las existentes ──
-    try {
-      const fasesExistentes = await getFasesDeOrden(idOrden)
-      for (const f of (fasesExistentes || [])) {
-        await eliminarFaseOperario(f.Id_Orden_Operario)
+    // Fases: sincronizar SIN borrar las que no cambiaron
+    // (borrar y recrear reiniciaba las fases ya completadas y se perdia el historial).
+    let fasesExistentes = []
+    try { fasesExistentes = (await getFasesDeOrden(idOrden)) || [] } catch { /* continuar */ }
+
+    const idsEnForm = new Set(
+      form.value.fases.map(f => f.Id_Orden_Operario).filter(Boolean)
+    )
+
+    // Quitar solo las fases que el admin removio en el modal
+    for (const f of fasesExistentes) {
+      if (!idsEnForm.has(f.Id_Orden_Operario)) {
+        try { await eliminarFaseOperario(f.Id_Orden_Operario) }
+        catch (e) { console.warn('No se pudo quitar la fase:', e.message) }
       }
-    } catch { /* continuar */ }
+    }
 
     let notificado = false
     for (const fase of form.value.fases) {
+      if (fase.Id_Orden_Operario) continue   // ya existe: no se toca
       try {
         await crearFaseOperario({
           Id_Orden:         idOrden,

@@ -60,6 +60,14 @@ router.get('/operario/:idOperario', async (req, res) => {
       INNER JOIN material m ON op."Id_Material" = m."Id_Material"
       LEFT JOIN usuario opr ON op."Id_Operario" = opr."Id_Usuario"
       WHERE op."Id_Operario" = $1
+         OR EXISTS (
+              SELECT 1 FROM orden_operario oo
+              WHERE oo."Id_Orden" = op."Id_Orden" AND oo."Id_Operario" = $1
+            )
+         OR EXISTS (
+              SELECT 1 FROM orden_operario oo
+              WHERE oo."Id_Orden" = op."Id_Orden" AND oo."Id_Operario" = $1
+            )
       ORDER BY op."Fecha_Limite" ASC
     `, [req.params.idOperario])
     res.json(rows)
@@ -214,8 +222,8 @@ router.put('/:id', async (req, res) => {
           "Prioridad"=$7,
           "Fecha_Limite"=$8,
           "Estado"=$9,
-          "Unidades"=$10,
-          "Unidades_Realizadas"=$11,
+          "Unidades"=COALESCE($10, "Unidades"),
+          "Unidades_Realizadas"=COALESCE($11, "Unidades_Realizadas"),
           "Dificultad"=$12
       WHERE "Id_Orden"=$13
     `, [
