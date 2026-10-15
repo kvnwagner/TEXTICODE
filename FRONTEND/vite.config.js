@@ -25,3 +25,7 @@ export default defineConfig({
     }
   }
 })
+export default defineConfig({
+  base: '/TEXTICODE/',
+  // ...el resto de tu configuración igual
+})
