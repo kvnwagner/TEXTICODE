@@ -7,8 +7,7 @@ export default defineConfig(({ command }) => {
   const isDev = command === 'serve'
 
   return {
-    // Debe coincidir EXACTO con el nombre del repo en GitHub
-    base: isDev ? '/' : '/Prueba_Vercel_TEXTICODE/',
+    base: isDev ? '/' : '/TEXTICODE/',
     plugins: [vue()],
     resolve: {
       alias: {
