@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHashHistory } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 
 const routes = [
@@ -31,15 +31,16 @@ const routes = [
   { path: '/cliente/cuenta',   name: 'ClienteCuenta',   component: () => import('../views/cliente/CuentaPersonal.vue'),   meta: { rol: 'cliente' } },
   { path: '/cliente/pedidos',  name: 'ClientePedidos',  component: () => import('../views/cliente/PedidosEntregas.vue'),  meta: { rol: 'cliente' } },
   { path: '/cliente/soporte',  name: 'ClienteSoporte',  component: () => import('../views/cliente/CentroSoporte.vue'),    meta: { rol: 'cliente' } },
-  { path: '/cliente/alertas', name: 'ClienteAlertas', component: () => import('../views/cliente/AlertasMateriales.vue'), meta: { rol: 'cliente' } },
+  { path: '/cliente/alertas',  name: 'ClienteAlertas',  component: () => import('../views/cliente/AlertasMateriales.vue'), meta: { rol: 'cliente' } },
   { path: '/cliente/google-calendar', name: 'ClienteGoogleCalendar', component: () => import('../views/GoogleCalendarView.vue'), meta: { rol: 'cliente' } },
- 
+
   // 404
   { path: '/:pathMatch(.*)*', redirect: '/' }
 ]
 
 const router = createRouter({
-  history: createWebHistory(),
+  // Hash mode: necesario para GitHub Pages (no hay servidor que resuelva rutas)
+  history: createWebHashHistory(import.meta.env.BASE_URL),
   routes,
   scrollBehavior(to, from, savedPosition) {
     if (savedPosition) return savedPosition
