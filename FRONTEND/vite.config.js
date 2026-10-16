@@ -7,7 +7,9 @@ export default defineConfig(({ command }) => {
   const isDev = command === 'serve'
 
   return {
-    base: isDev ? '/' : '/TEXTICODE/',
+    // En desarrollo siempre '/'. En producción usa la variable VITE_BASE
+    // (solo GitHub Pages la define como '/TEXTICODE/'); si no existe, '/'.
+    base: isDev ? '/' : (process.env.VITE_BASE || '/'),
     plugins: [vue()],
     resolve: {
       alias: {
